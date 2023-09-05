@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>     
+    
+    <section id="cenario">
+
+    </section>    
+
+
+    <script>
+
+        const porcentagemCenarios = []
+
+        const cenarioItem = {
+            tipo: '',
+            solido: false,
+        }
+
+        const largura = 256;        
+        let blocoAtual = 48;
+
+        const tiposCenarios = [
+            {
+                tipo: 'terra',
+                porcentagem: 90,
+                fundo: 'fundo-terra',
+                solido: false,
+            },
+            {
+                tipo: 'grama',
+                porcentagem: 8,
+                fundo: 'fundo-grama',
+                solido: false,
+            },
+            {
+                tipo: 'arbusto',
+                porcentagem: 2,
+                fundo: 'fundo-arbusto',
+                solido: true,
+            },
+        ]
+
+        const cenario = [];
+
+        const gerarCenario = async () => {
+            return new Promise(function (resolve, reject){                
+                for (let index = 0; index < largura; index++) {
+                    const porcentagem =  Math.floor(Math.random() * 100);                    
+                    cenario.push({
+                        ...cenarioItem,
+                        tipo: tiposCenarios[porcentagemCenarios[porcentagem]].fundo,
+                        solido: tiposCenarios[porcentagemCenarios[porcentagem]].solido,
+                    })        
+                }
+                resolve();
+            });            
+        }
+
+        const gerarPorcentagemDeCanarios = () => {
+            return new Promise(function (resolve, reject){
+                //Verificar se a porcentagem dos cenarios da 100%
+                const totalPorcentagemCenarios = tiposCenarios.reduce((a, b) => a + (b.porcentagem || 0), 0);
+                if(totalPorcentagemCenarios != 100){
+                    reject();
+                }
+            
+
+                tiposCenarios.map((item, indexCenario) => {
+                    for (let index = 0; index <item.porcentagem; index++) {
+                        porcentagemCenarios.push(indexCenario)                    
+                    }
+                })
+
+                resolve();
+            });
+        }
+
+        const renderizarCenario = () => {
+            return new Promise(function (resolve, reject){
+                const blocoCenario = document.getElementById("cenario");
+
+                cenario.map((item, index) => {                            
+                    blocoCenario.innerHTML += `
+                        <div id="${index}" class="fundo-terra">
+                            <div class="${item.tipo}"></div>
+                        </div>                        
+                    `;
+                })                
+
+                resolve();
+            });
+        }
+
+        const iniciarPersonagem = () => {
+
+            document.addEventListener("keypress", function(event) {
+                console.log(event.keyCode)
+                if(event.keyCode == 100){
+                    blocoAtual++
+                    renderizarPersonagem(blocoAtual)
+                }
+
+                if(event.keyCode == 97){
+                    blocoAtual--
+                    renderizarPersonagem(blocoAtual)
+                }
+
+            });
+
+            renderizarPersonagem(blocoAtual)
+            
+        }
+
+        const renderizarPersonagem = (bloco) => {
+            try {
+                document.getElementById("personagem").outerHTML = "";
+            } catch (error) {
+                
+            }            
+            const blocoPersonagem = document.getElementById(blocoAtual);
+            blocoPersonagem.innerHTML = `<img id="personagem" width="70" height="70" src="personagens/personagem.png" alt="" style="position: absolute;">`
+        }
+
+        const iniciarGame = async () => {
+            gerarPorcentagemDeCanarios().then(async() => {                
+                await gerarCenario().then(() => {                    
+                    renderizarCenario().then(() => {
+                        iniciarPersonagem();
+                    })
+                })
+            })                        
+        
+        }
+
+        window.onload = iniciarGame();
+
+    </script>
+</body>
+</html>
